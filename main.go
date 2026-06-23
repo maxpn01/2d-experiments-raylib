@@ -33,10 +33,15 @@ func main() {
 			move.X += 1
 		}
 
+		speed := player.speed
+		if rl.IsKeyDown(rl.KeyLeftShift) {
+			speed *= 2
+		}
+
 		if move.X != 0 || move.Y != 0 {
 			move = rl.Vector2Normalize(move)
-			player.pos.X += move.X * player.speed * dt
-			player.pos.Y += move.Y * player.speed * dt
+			player.pos.X += move.X * speed * dt
+			player.pos.Y += move.Y * speed * dt
 		}
 
 		rl.BeginDrawing()
