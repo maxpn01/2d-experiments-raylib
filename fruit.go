@@ -53,3 +53,10 @@ func spawnFruit(window *Window, fs *FruitSpawner, dt float32) {
 		fs.fruitSpawnInterval = 1 + rand.Intn(20)
 	}
 }
+
+func (fs *FruitSpawner) despawnFruit(fruitIndex int) {
+	// when order matters, but much slower as it shifts the elements to the left
+	// fs.fruits = append(fs.fruits[:fruitIndex], fs.fruits[fruitIndex+1:]...)
+	fs.fruits[fruitIndex] = fs.fruits[len(fs.fruits)-1]
+	fs.fruits = fs.fruits[:len(fs.fruits)-1]
+}

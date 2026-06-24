@@ -16,8 +16,11 @@ type Player struct {
 	maxHP float32
 }
 
+const playerHPIncrement = 0.25
+
 func (p *Player) update(dt float32) {
 	handlePlayerMovement(window, p, dt)
+	handlePlayerFruitCollision(p, fruitSpawner)
 }
 
 func (p *Player) draw() {
@@ -55,7 +58,7 @@ func handlePlayerMovement(window *Window, player *Player, dt float32) {
 		player.pos.Y += move.Y * speed * dt
 	}
 
-	// check for edges
+	// clamp to game window edges
 	if player.pos.X < 0 {
 		player.pos.X = 0
 	}
@@ -70,5 +73,13 @@ func handlePlayerMovement(window *Window, player *Player, dt float32) {
 	}
 }
 
-// func checkPlayerFruitCollision(fruitPos rl.Vector2) {}
-// func checkCollisions(o *GameObject, leftEdge, topEdge, rightEdge, bottomEdge float32) {}
+func handlePlayerFruitCollision(player *Player, fs *FruitSpawner) {
+	for i := len(fs.fruits) - 1; i >= 0; i-- {
+		hasPlayerCollidedWithFruit := checkCollisions(player.pos, player.size, fs.fruits[i].pos, fs.fruits[i].size)
+
+		if hasPlayerCollidedWithFruit && player.hp < player.maxHP {
+			player.hp += playerHPIncrement
+			fs.despawnFruit(i)
+		}
+	}
+}

@@ -29,7 +29,7 @@ var window = &Window{
 
 var player = &Player{
 	pos:   rl.NewVector2(300, 300),
-	size:  rl.NewVector2(30, 30),
+	size:  rl.NewVector2(50, 50),
 	color: rl.Red,
 	speed: 400,
 	hp:    1,
@@ -47,7 +47,7 @@ var hpText = &HPText{
 
 var fruitSpawner = &FruitSpawner{
 	fruits:             []Fruit{},
-	fruitSize:          20,
+	fruitSize:          30,
 	fruitSpawnTimer:    0,
 	fruitSpawnInterval: 1 + rand.Intn(20),
 	maxFruits:          20,
@@ -77,4 +77,11 @@ func main() {
 	}
 
 	rl.CloseWindow()
+}
+
+func checkCollisions(pos1, size1, pos2, size2 rl.Vector2) bool {
+	overlapX := pos1.X < pos2.X+size2.X && pos1.X+size1.X > pos2.X
+	overlapY := pos1.Y < pos2.Y+size2.Y && pos1.Y+size1.Y > pos2.Y
+
+	return overlapX && overlapY
 }
