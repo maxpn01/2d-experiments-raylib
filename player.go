@@ -9,11 +9,22 @@ import (
 type Player struct {
 	pos   rl.Vector2
 	size  rl.Vector2
-	speed float32
 	color color.RGBA
+
+	speed float32
+	hp    float32
+	maxHP float32
 }
 
-func (p *Player) handlePlayerMovement(window *Window, dt float32) {
+func (p *Player) update(dt float32) {
+	handlePlayerMovement(window, p, dt)
+}
+
+func (p *Player) draw() {
+	rl.DrawRectangle(int32(p.pos.X), int32(p.pos.Y), int32(p.size.X), int32(p.size.Y), p.color)
+}
+
+func handlePlayerMovement(window *Window, player *Player, dt float32) {
 	move := rl.Vector2{}
 
 	// wasd movement
@@ -31,7 +42,7 @@ func (p *Player) handlePlayerMovement(window *Window, dt float32) {
 	}
 
 	// shift speed
-	speed := p.speed
+	speed := player.speed
 	if rl.IsKeyDown(rl.KeyLeftShift) {
 		speed *= 2
 	}
@@ -40,21 +51,24 @@ func (p *Player) handlePlayerMovement(window *Window, dt float32) {
 	if move.X != 0 || move.Y != 0 {
 		move = rl.Vector2Normalize(move)
 
-		p.pos.X += move.X * speed * dt
-		p.pos.Y += move.Y * speed * dt
+		player.pos.X += move.X * speed * dt
+		player.pos.Y += move.Y * speed * dt
 	}
 
 	// check for edges
-	if p.pos.X < 0 {
-		p.pos.X = 0
+	if player.pos.X < 0 {
+		player.pos.X = 0
 	}
-	if p.pos.Y < 0 {
-		p.pos.Y = 0
+	if player.pos.Y < 0 {
+		player.pos.Y = 0
 	}
-	if p.pos.X+p.size.X > float32(window.width) {
-		p.pos.X = float32(window.width) - p.size.X
+	if player.pos.X+player.size.X > float32(window.width) {
+		player.pos.X = float32(window.width) - player.size.X
 	}
-	if p.pos.Y+p.size.Y > float32(window.height) {
-		p.pos.Y = float32(window.height) - p.size.Y
+	if player.pos.Y+player.size.Y > float32(window.height) {
+		player.pos.Y = float32(window.height) - player.size.Y
 	}
 }
+
+// func checkPlayerFruitCollision(fruitPos rl.Vector2) {}
+// func checkCollisions(o *GameObject, leftEdge, topEdge, rightEdge, bottomEdge float32) {}

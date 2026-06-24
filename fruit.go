@@ -22,7 +22,17 @@ type FruitSpawner struct {
 	maxFruits          int
 }
 
-func (fs *FruitSpawner) spawnFruit(window *Window, dt float32) {
+func (fs *FruitSpawner) update(dt float32) {
+	spawnFruit(window, fs, dt)
+}
+
+func (fs *FruitSpawner) draw() {
+	for _, fruit := range fs.fruits {
+		rl.DrawRectangle(int32(fruit.pos.X), int32(fruit.pos.Y), int32(fruit.size.X), int32(fruit.size.Y), fruit.color)
+	}
+}
+
+func spawnFruit(window *Window, fs *FruitSpawner, dt float32) {
 	fs.fruitSpawnTimer += dt
 
 	if fs.fruitSpawnTimer >= float32(fs.fruitSpawnInterval) && len(fs.fruits) < fs.maxFruits {

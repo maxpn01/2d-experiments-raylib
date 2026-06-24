@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"math/rand"
 
@@ -14,32 +15,34 @@ type Window struct {
 	bgColor color.RGBA
 }
 
-type Text struct {
-	text  string
-	pos   rl.Vector2
-	font  int32
-	color color.RGBA
+type GameObject interface {
+	update(dt float32)
+	draw()
 }
 
 var window = &Window{
 	width:   1280,
 	height:  720,
-	title:   "2d game",
+	title:   "2D game",
 	bgColor: rl.Black,
-}
-
-var title = &Text{
-	text:  "2D game",
-	pos:   rl.NewVector2(20, 20),
-	font:  24,
-	color: rl.RayWhite,
 }
 
 var player = &Player{
 	pos:   rl.NewVector2(300, 300),
 	size:  rl.NewVector2(30, 30),
-	speed: 400,
 	color: rl.Red,
+	speed: 400,
+	hp:    1,
+	maxHP: 100,
+}
+
+var hpText = &HPText{
+	Text: Text{
+		pos:   rl.NewVector2(30, 30),
+		color: rl.RayWhite,
+		text:  fmt.Sprintf("hp: %.2f", player.hp),
+		font:  24,
+	},
 }
 
 var fruitSpawner = &FruitSpawner{
@@ -50,6 +53,8 @@ var fruitSpawner = &FruitSpawner{
 	maxFruits:          20,
 }
 
+var entities = []GameObject{player, hpText, fruitSpawner}
+
 func main() {
 	rl.InitWindow(window.width, window.height, window.title)
 	rl.SetTargetFPS(60)
@@ -57,20 +62,16 @@ func main() {
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
 
-		player.handlePlayerMovement(window, dt)
-		fruitSpawner.spawnFruit(window, dt)
-
-		rl.BeginDrawing()
-
-		rl.ClearBackground(window.bgColor)
-
-		rl.DrawRectangle(int32(player.pos.X), int32(player.pos.Y), int32(player.size.X), int32(player.size.Y), player.color)
-
-		for _, fruit := range fruitSpawner.fruits {
-			rl.DrawRectangle(int32(fruit.pos.X), int32(fruit.pos.Y), int32(fruit.size.X), int32(fruit.size.Y), fruit.color)
+		for _, e := range entities {
+			e.update(dt)
 		}
 
-		rl.DrawText(title.text, int32(title.pos.X), int32(title.pos.Y), title.font, title.color)
+		rl.BeginDrawing()
+		rl.ClearBackground(window.bgColor)
+
+		for _, e := range entities {
+			e.draw()
+		}
 
 		rl.EndDrawing()
 	}
