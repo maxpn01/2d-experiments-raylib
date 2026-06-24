@@ -1,38 +1,73 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	"image/color"
+	"log"
+	"math/rand"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 type Window struct {
-	width  int32
-	height int32
-	title  string
+	width   int32
+	height  int32
+	title   string
+	bgColor color.RGBA
+}
+
+type Text struct {
+	text  string
+	pos   rl.Vector2
+	font  int32
+	color color.RGBA
 }
 
 type Player struct {
 	pos   rl.Vector2
 	size  rl.Vector2
 	speed float32
+	color color.RGBA
 }
 
+type Fruit struct {
+	pos   rl.Vector2
+	size  rl.Vector2
+	color color.RGBA
+}
+
+const maxFruits = 20
+
 func main() {
-	window := &Window{
-		width:  1280,
-		height: 720,
-		title:  "2d game",
+	var window = &Window{
+		width:   1280,
+		height:  720,
+		title:   "2d game",
+		bgColor: rl.Black,
 	}
+
+	var title = &Text{
+		text:  "2D game",
+		pos:   rl.NewVector2(20, 20),
+		font:  24,
+		color: rl.RayWhite,
+	}
+
+	var player = &Player{
+		pos:   rl.NewVector2(300, 300),
+		size:  rl.NewVector2(30, 30),
+		speed: 400,
+		color: rl.Red,
+	}
+
+	var fruits = []Fruit{}
+	var fruitSpawnTimer float32
+	var fruitSpawnInterval = 1 + rand.Intn(20)
 
 	rl.InitWindow(window.width, window.height, window.title)
-
-	player := &Player{
-		pos:   rl.NewVector2(300, 300),
-		size:  rl.NewVector2(50, 50),
-		speed: 400,
-	}
+	rl.SetTargetFPS(60)
 
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
-
-		rl.SetTargetFPS(60)
 
 		move := rl.Vector2{}
 
@@ -74,10 +109,34 @@ func main() {
 			player.pos.Y = float32(window.height) - player.size.Y
 		}
 
+		fruitSpawnTimer += dt
+
+		if fruitSpawnTimer >= float32(fruitSpawnInterval) && len(fruits) < maxFruits {
+			fruitSize := 20
+			fruitRandX := rand.Intn(int(window.width) - fruitSize)
+			fruitRandY := rand.Intn(int(window.height) - fruitSize)
+
+			fruit := &Fruit{
+				pos:   rl.NewVector2(float32(fruitRandX), float32(fruitRandY)),
+				size:  rl.NewVector2(float32(fruitSize), float32(fruitSize)),
+				color: rl.Green,
+			}
+
+			log.Printf("fruit spawned: x %f y %f", fruit.pos.X, fruit.pos.Y)
+
+			fruits = append(fruits, *fruit)
+
+			fruitSpawnTimer = 0
+			fruitSpawnInterval = 1 + rand.Intn(20)
+		}
+
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.Black)
-		rl.DrawRectangle(int32(player.pos.X), int32(player.pos.Y), int32(player.size.X), int32(player.size.Y), rl.Red)
-		rl.DrawText("2D game", 20, 20, 24, rl.RayWhite)
+		rl.ClearBackground(window.bgColor)
+		rl.DrawRectangle(int32(player.pos.X), int32(player.pos.Y), int32(player.size.X), int32(player.size.Y), player.color)
+		for _, fruit := range fruits {
+			rl.DrawRectangle(int32(fruit.pos.X), int32(fruit.pos.Y), int32(fruit.size.X), int32(fruit.size.Y), fruit.color)
+		}
+		rl.DrawText(title.text, int32(title.pos.X), int32(title.pos.Y), title.font, title.color)
 		rl.EndDrawing()
 	}
 
