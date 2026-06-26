@@ -17,10 +17,13 @@ type Fruit struct {
 type FruitSpawner struct {
 	fruits             []Fruit
 	fruitSize          int
+	fruitColor         color.RGBA
 	fruitSpawnTimer    float32
 	fruitSpawnInterval int
 	maxFruits          int
 }
+
+const fruitSpawnIntervalMaxSeconds = 10
 
 func (fs *FruitSpawner) update(dt float32) {
 	spawnFruit(window, fs, dt)
@@ -42,7 +45,7 @@ func spawnFruit(window *Window, fs *FruitSpawner, dt float32) {
 		fruit := Fruit{
 			pos:   rl.NewVector2(float32(fruitRandX), float32(fruitRandY)),
 			size:  rl.NewVector2(float32(fs.fruitSize), float32(fs.fruitSize)),
-			color: rl.Green,
+			color: fs.fruitColor,
 		}
 
 		log.Printf("fruit spawned (x: %f, y: %f)", fruit.pos.X, fruit.pos.Y)
@@ -50,7 +53,7 @@ func spawnFruit(window *Window, fs *FruitSpawner, dt float32) {
 		fs.fruits = append(fs.fruits, fruit)
 
 		fs.fruitSpawnTimer = 0
-		fs.fruitSpawnInterval = 1 + rand.Intn(20)
+		fs.fruitSpawnInterval = 1 + rand.Intn(fruitSpawnIntervalMaxSeconds)
 	}
 }
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"math/rand"
 
@@ -13,11 +12,6 @@ type Window struct {
 	height  int32
 	title   string
 	bgColor color.RGBA
-}
-
-type GameObject interface {
-	update(dt float32)
-	draw()
 }
 
 var window = &Window{
@@ -36,24 +30,46 @@ var player = &Player{
 	maxHP: 100,
 }
 
-var hpText = &HPText{
-	Text: Text{
-		pos:   rl.NewVector2(30, 30),
-		color: rl.RayWhite,
-		text:  fmt.Sprintf("hp: %.2f", player.hp),
-		font:  24,
-	},
-}
-
 var fruitSpawner = &FruitSpawner{
 	fruits:             []Fruit{},
 	fruitSize:          30,
+	fruitColor:         rl.Yellow,
 	fruitSpawnTimer:    0,
-	fruitSpawnInterval: 1 + rand.Intn(20),
+	fruitSpawnInterval: 1 + rand.Intn(fruitSpawnIntervalMaxSeconds),
 	maxFruits:          20,
 }
 
-var entities = []GameObject{player, hpText, fruitSpawner}
+var snake = &Snake{
+	pos:   rl.NewVector2(float32(window.width)/2, float32(window.height)/2),
+	size:  rl.NewVector2(50, 50),
+	color: rl.Green,
+	speed: 400,
+	hp:    1,
+	maxHP: 100,
+}
+
+var playerHpText = &HPText{
+	Text: Text{
+		pos:   rl.NewVector2(30, 30),
+		color: rl.RayWhite,
+		font:  24,
+	},
+	label:    "hp:",
+	hpSource: func() float32 { return player.hp },
+}
+
+var snakeHpText = &HPText{
+	Text: Text{
+		pos:   rl.NewVector2(float32(window.width)-190, 30),
+		color: rl.RayWhite,
+		font:  24,
+	},
+	label:    "snake hp:",
+	hpSource: func() float32 { return snake.hp },
+}
+
+var entities = []GameObject{player, fruitSpawner, snake}
+var hud = []GameObject{playerHpText, snakeHpText}
 
 func main() {
 	rl.InitWindow(window.width, window.height, window.title)
@@ -66,6 +82,10 @@ func main() {
 			e.update(dt)
 		}
 
+		for _, e := range hud {
+			e.update(dt)
+		}
+
 		rl.BeginDrawing()
 		rl.ClearBackground(window.bgColor)
 
@@ -73,15 +93,12 @@ func main() {
 			e.draw()
 		}
 
+		for _, e := range hud {
+			e.draw()
+		}
+
 		rl.EndDrawing()
 	}
 
 	rl.CloseWindow()
-}
-
-func checkCollisions(pos1, size1, pos2, size2 rl.Vector2) bool {
-	overlapX := pos1.X < pos2.X+size2.X && pos1.X+size1.X > pos2.X
-	overlapY := pos1.Y < pos2.Y+size2.Y && pos1.Y+size1.Y > pos2.Y
-
-	return overlapX && overlapY
 }

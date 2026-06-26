@@ -16,18 +16,18 @@ type Player struct {
 	maxHP float32
 }
 
-const playerHPIncrement = 0.25
+const playerHpIncrement = 0.25
 
 func (p *Player) update(dt float32) {
-	handlePlayerMovement(window, p, dt)
-	handlePlayerFruitCollision(p, fruitSpawner)
+	p.movePlayer(window, dt)
+	p.handlePlayerFruitCollision(fruitSpawner)
 }
 
 func (p *Player) draw() {
 	rl.DrawRectangle(int32(p.pos.X), int32(p.pos.Y), int32(p.size.X), int32(p.size.Y), p.color)
 }
 
-func handlePlayerMovement(window *Window, player *Player, dt float32) {
+func (p *Player) movePlayer(window *Window, dt float32) {
 	move := rl.Vector2{}
 
 	// wasd movement
@@ -45,7 +45,7 @@ func handlePlayerMovement(window *Window, player *Player, dt float32) {
 	}
 
 	// shift speed
-	speed := player.speed
+	speed := p.speed
 	if rl.IsKeyDown(rl.KeyLeftShift) {
 		speed *= 2
 	}
@@ -54,31 +54,21 @@ func handlePlayerMovement(window *Window, player *Player, dt float32) {
 	if move.X != 0 || move.Y != 0 {
 		move = rl.Vector2Normalize(move)
 
-		player.pos.X += move.X * speed * dt
-		player.pos.Y += move.Y * speed * dt
+		p.pos.X += move.X * speed * dt
+		p.pos.Y += move.Y * speed * dt
 	}
 
 	// clamp to game window edges
-	if player.pos.X < 0 {
-		player.pos.X = 0
-	}
-	if player.pos.Y < 0 {
-		player.pos.Y = 0
-	}
-	if player.pos.X+player.size.X > float32(window.width) {
-		player.pos.X = float32(window.width) - player.size.X
-	}
-	if player.pos.Y+player.size.Y > float32(window.height) {
-		player.pos.Y = float32(window.height) - player.size.Y
-	}
+	clamp(0, &p.pos.X, &p.size.X, float32(window.width))
+	clamp(0, &p.pos.Y, &p.size.Y, float32(window.height))
 }
 
-func handlePlayerFruitCollision(player *Player, fs *FruitSpawner) {
+func (p *Player) handlePlayerFruitCollision(fs *FruitSpawner) {
 	for i := len(fs.fruits) - 1; i >= 0; i-- {
-		hasPlayerCollidedWithFruit := checkCollisions(player.pos, player.size, fs.fruits[i].pos, fs.fruits[i].size)
+		hasPlayerCollidedWithFruit := checkCollisions(p.pos, p.size, fs.fruits[i].pos, fs.fruits[i].size)
 
-		if hasPlayerCollidedWithFruit && player.hp < player.maxHP {
-			player.hp += playerHPIncrement
+		if hasPlayerCollidedWithFruit && p.hp < p.maxHP {
+			p.hp += playerHpIncrement
 			fs.despawnFruit(i)
 		}
 	}

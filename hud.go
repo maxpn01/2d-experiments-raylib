@@ -23,8 +23,10 @@ func (t *Text) draw() {
 
 type HPText struct {
 	Text
+	label    string
+	hpSource func() float32
 }
 
 func (h *HPText) update(dt float32) {
-	h.text = fmt.Sprintf("hp: %.2f", player.hp)
+	h.text = fmt.Sprintf("%s %.2f", h.label, h.hpSource())
 }
