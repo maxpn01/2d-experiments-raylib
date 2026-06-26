@@ -20,6 +20,10 @@ type Snake struct {
 	size  rl.Vector2
 	color color.RGBA
 
+	lvl    int
+	maxLvl int
+	exp    float32
+
 	speed float32
 	hp    float32
 	maxHP float32
@@ -29,7 +33,22 @@ type Snake struct {
 	actionState SnakeActionState
 }
 
+func NewSnake(pos, size rl.Vector2, color color.RGBA, speed, maxHP float32, maxLvl int) *Snake {
+	return &Snake{
+		pos:    pos,
+		size:   size,
+		color:  color,
+		lvl:    1,
+		maxLvl: maxLvl,
+		speed:  speed,
+		hp:     1,
+		maxHP:  maxHP,
+	}
+}
+
+const snakeExpIncrement = 0.25
 const snakeHpIncrement = 0.25
+const snakeSpeedIncrement = 0.25
 
 func (s *Snake) update(dt float32) {
 	switch s.actionState {
@@ -107,8 +126,8 @@ func (s *Snake) moveSnake(targetPos, targetSize rl.Vector2, window *Window, dt f
 	if move.X != 0 || move.Y != 0 {
 		move = rl.Vector2Normalize(move)
 
-		snake.pos.X += move.X * s.speed * dt
-		snake.pos.Y += move.Y * s.speed * dt
+		s.pos.X += move.X * s.speed * dt
+		s.pos.Y += move.Y * s.speed * dt
 	}
 
 	// clamp to game window edges
@@ -117,19 +136,38 @@ func (s *Snake) moveSnake(targetPos, targetSize rl.Vector2, window *Window, dt f
 }
 
 func (s *Snake) checkSnakeFruitCollision(fs *FruitSpawner) (bool, int) {
+	expForNextLvl := s.calcExpForNextLvl(s.lvl)
+
 	for i := len(fs.fruits) - 1; i >= 0; i-- {
 		hasSnakeCollidedWithFruit := checkCollisions(s.pos, s.size, fs.fruits[i].pos, fs.fruits[i].size)
 
 		if hasSnakeCollidedWithFruit && s.hp < s.maxHP {
+			if s.exp < expForNextLvl {
+				s.exp += snakeExpIncrement
+			}
 			return true, i
 		}
+	}
+
+	if s.exp == expForNextLvl {
+		s.exp -= expForNextLvl
+		s.lvl++
+
+		if s.hp < s.maxHP {
+			s.hp += playerHpIncrement
+		}
+		s.speed += snakeSpeedIncrement
 	}
 
 	return false, -1
 }
 
+func (s *Snake) calcExpForNextLvl(lvl int) float32 {
+	return float32(lvl * lvl)
+}
+
 func (s *Snake) eatFood(fs *FruitSpawner, fruitIndex int) {
-	s.hp += snakeHpIncrement
+	s.hp += snakeExpIncrement
 	fs.despawnFruit(fruitIndex)
 	s.actionState = ActionSearchingFood
 	s.targetIndex = -1

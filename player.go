@@ -11,12 +11,32 @@ type Player struct {
 	size  rl.Vector2
 	color color.RGBA
 
+	lvl    int
+	maxLvl int
+	exp    float32
+
 	speed float32
 	hp    float32
 	maxHP float32
 }
 
-const playerHpIncrement = 0.25
+func NewPlayer(pos, size rl.Vector2, color color.RGBA, speed, maxHP float32, maxLvl int) *Player {
+	return &Player{
+		pos:    pos,
+		size:   size,
+		color:  color,
+		lvl:    1,
+		maxLvl: maxLvl,
+		speed:  speed,
+		hp:     1,
+		maxHP:  maxHP,
+	}
+}
+
+const playerExpIncrement = 0.25
+
+var playerHpIncrement float32 = 0.25
+var playerSpeedIncrement float32 = 0.25
 
 func (p *Player) update(dt float32) {
 	p.movePlayer(window, dt)
@@ -64,12 +84,32 @@ func (p *Player) movePlayer(window *Window, dt float32) {
 }
 
 func (p *Player) handlePlayerFruitCollision(fs *FruitSpawner) {
+	expForNextLvl := p.calcExpForNextLvl(p.lvl)
+
 	for i := len(fs.fruits) - 1; i >= 0; i-- {
 		hasPlayerCollidedWithFruit := checkCollisions(p.pos, p.size, fs.fruits[i].pos, fs.fruits[i].size)
 
-		if hasPlayerCollidedWithFruit && p.hp < p.maxHP {
-			p.hp += playerHpIncrement
+		if hasPlayerCollidedWithFruit {
+			if p.exp < expForNextLvl {
+				p.exp += playerExpIncrement
+			}
 			fs.despawnFruit(i)
 		}
 	}
+
+	if p.exp == expForNextLvl {
+		p.exp -= expForNextLvl
+		p.lvl++
+
+		if p.hp < p.maxHP {
+			p.hp += playerHpIncrement
+			playerHpIncrement += playerHpIncrement
+		}
+		p.speed += playerSpeedIncrement
+		playerSpeedIncrement += playerSpeedIncrement
+	}
+}
+
+func (p *Player) calcExpForNextLvl(lvl int) float32 {
+	return float32(lvl * lvl)
 }

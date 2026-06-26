@@ -1,4 +1,4 @@
-module 2d-raylib
+module raylib-2d-sandbox
 
 go 1.26.2
 
