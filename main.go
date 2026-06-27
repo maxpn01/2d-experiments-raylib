@@ -14,8 +14,8 @@ type Window struct {
 }
 
 var window = &Window{
-	width:   1280,
-	height:  720,
+	width:   1440,
+	height:  820,
 	title:   "2D sandbox",
 	bgColor: rl.Black,
 }
@@ -23,21 +23,24 @@ var window = &Window{
 var windowCenter = rl.NewVector2(float32(window.width)/2, float32(window.height)/2)
 
 /* Game entities */
-var player = NewPlayer(rl.NewVector2(300, 300), rl.NewVector2(50, 50), rl.Red, 400, 100, 100)
-var fruitSpawner = NewFruitSpawner(rl.NewVector2(30, 30), rl.Yellow, 1, 20)
-var snake = NewSnake(rl.NewVector2(windowCenter.X, windowCenter.Y), rl.NewVector2(50, 50), rl.Green, 200, 100, 100)
+var player = NewPlayer(rl.NewVector2(300, 300), rl.NewVector2(30, 30), rl.Red, 400, 100, 100)
+var fruitSpawner = NewFruitSpawner(rl.NewVector2(15, 15), rl.Yellow, 1, 20)
+var snake = NewSnake(rl.NewVector2(windowCenter.X, windowCenter.Y), rl.NewVector2(30, 30), rl.Green, 200, 100, 100)
 
 var entities = []GameObject{player, fruitSpawner, snake}
 
 /* HUD entities */
-var playerHpText = NewHUDText(rl.NewVector2(30, 30), 24, rl.RayWhite, "hp:", func() float32 { return player.hp })
-var playerLvlText = NewHUDText(rl.NewVector2(130, 30), 24, rl.RayWhite, "lvl:", func() float32 { return float32(player.lvl) })
-var playerExpText = NewHUDText(rl.NewVector2(230, 30), 24, rl.RayWhite, "exp:", func() float32 { return player.exp })
-var playerSpeedText = NewHUDText(rl.NewVector2(30, 60), 22, rl.RayWhite, "speed:", func() float32 { return player.speed })
+const hudTopPadding = 20
+const hudTextSize = 22
 
-var snakeHpText = NewHUDText(rl.NewVector2(float32(window.width-190), 30), 24, rl.RayWhite, "snake hp:", func() float32 { return snake.hp })
-var snakeLvlText = NewHUDText(rl.NewVector2(float32(window.width-380), 30), 24, rl.RayWhite, "snake lvl:", func() float32 { return float32(snake.lvl) })
-var snakeExpText = NewHUDText(rl.NewVector2(float32(window.width-590), 30), 24, rl.RayWhite, "snake exp:", func() float32 { return snake.exp })
+var playerHpText = NewHUDText(rl.NewVector2(30, hudTopPadding), hudTextSize, rl.RayWhite, "hp:", func() float32 { return player.hp })
+var playerLvlText = NewHUDText(rl.NewVector2(130, hudTopPadding), hudTextSize, rl.RayWhite, "lvl:", func() float32 { return float32(player.lvl) })
+var playerExpText = NewHUDText(rl.NewVector2(230, hudTopPadding), hudTextSize, rl.RayWhite, "exp:", func() float32 { return player.exp })
+var playerSpeedText = NewHUDText(rl.NewVector2(350, hudTopPadding), hudTextSize, rl.RayWhite, "speed:", func() float32 { return player.speed })
+
+var snakeHpText = NewHUDText(rl.NewVector2(float32(window.width-190), hudTopPadding), hudTextSize, rl.RayWhite, "snake hp:", func() float32 { return snake.hp })
+var snakeLvlText = NewHUDText(rl.NewVector2(float32(window.width-360), hudTopPadding), hudTextSize, rl.RayWhite, "snake lvl:", func() float32 { return float32(snake.lvl) })
+var snakeExpText = NewHUDText(rl.NewVector2(float32(window.width-550), hudTopPadding), hudTextSize, rl.RayWhite, "snake exp:", func() float32 { return snake.exp })
 
 var hud = []GameObject{
 	playerHpText,

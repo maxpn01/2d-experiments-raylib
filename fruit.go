@@ -2,7 +2,6 @@ package main
 
 import (
 	"image/color"
-	"log"
 	"math/rand"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -55,15 +54,11 @@ func spawnFruit(window *Window, fs *FruitSpawner, dt float32) {
 		fruitRandX := rand.Intn(int(window.width) - int(fs.fruitSize.X))
 		fruitRandY := rand.Intn(int(window.height) - int(fs.fruitSize.Y))
 
-		fruit := Fruit{
+		fs.fruits = append(fs.fruits, Fruit{
 			pos:   rl.NewVector2(float32(fruitRandX), float32(fruitRandY)),
 			size:  rl.NewVector2(fs.fruitSize.X, fs.fruitSize.X),
 			color: fs.fruitColor,
-		}
-
-		log.Printf("fruit spawned (x: %f, y: %f)", fruit.pos.X, fruit.pos.Y)
-
-		fs.fruits = append(fs.fruits, fruit)
+		})
 
 		fs.fruitSpawnTimer = 0
 		fs.fruitSpawnInterval = 1 + rand.Intn(fruitSpawnIntervalMaxSeconds)
